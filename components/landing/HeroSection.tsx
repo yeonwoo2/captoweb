@@ -30,7 +30,7 @@ export default function HeroSection() {
         >
           iOS & Android 화면을
           <br />
-          macOS에서 쉽게 캡처하세요
+          PC에서 쉽게 캡처하세요
         </motion.h1>
 
         {/* Subtitle */}

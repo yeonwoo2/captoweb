@@ -30,10 +30,10 @@ export default function DownloadSection() {
     };
   }, []);
 
-  const handleDownload = () => {
-    // TODO: Firebase Storage 또는 GitHub Releases에서 DMG 다운로드
+  const handleDownload = (platform: 'macos' | 'windows') => {
+    // TODO: Firebase Storage 또는 GitHub Releases에서 다운로드
     // Google Analytics 이벤트 트래킹 추가
-    console.log('Download initiated');
+    console.log(`Download initiated for ${platform}`);
   };
 
   return (
@@ -57,7 +57,7 @@ export default function DownloadSection() {
           </h2>
 
           <p className="text-xl text-white/90 mb-12">
-            macOS 10.13 이상 지원
+            macOS 10.13 이상 • Windows 10 이상 지원
           </p>
 
           {/* App Icon & Info */}
@@ -84,27 +84,41 @@ export default function DownloadSection() {
             </h3>
             <p className="text-white/70 mb-8">81MB</p>
 
-            {/* Download Button */}
-            <button
-              onClick={handleDownload}
-              className="w-full md:w-auto px-12 py-4 bg-white text-primary rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg mb-6"
-            >
-              macOS용 다운로드 (DMG)
-            </button>
+            {/* Download Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+              <button
+                onClick={() => handleDownload('macos')}
+                className="px-12 py-4 bg-white text-primary rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+                macOS 다운로드
+              </button>
+              <button
+                onClick={() => handleDownload('windows')}
+                className="px-12 py-4 bg-white text-primary rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 12V6.75l6-1.32v6.48L3 12m6-7.25L21 3v9h-12V4.75M3 13l6 .09v6.81l-6-1.15V13m6 .09L21 13v9l-12-1.65V13.09Z"/>
+                </svg>
+                Windows 다운로드
+              </button>
+            </div>
 
-            {/* Features List */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-white/90">
+            {/* Platform Support */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-white/90 text-sm">
               <div className="flex items-center">
                 <span className="mr-2">✓</span>
                 <span>Intel & Apple Silicon</span>
               </div>
               <div className="flex items-center">
                 <span className="mr-2">✓</span>
-                <span>무료 체험 가능</span>
+                <span>Windows 10/11</span>
               </div>
               <div className="flex items-center">
                 <span className="mr-2">✓</span>
-                <span>클릭 한 번으로 설치</span>
+                <span>무료 체험 가능</span>
               </div>
             </div>
           </motion.div>
