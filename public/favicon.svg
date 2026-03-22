@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Rounded Rectangle with Gradient -->
+  <rect width="512" height="512" rx="120" fill="url(#gradient)"/>
+
+  <!-- Letter C -->
+  <path d="M336 256C336 300.183 300.183 336 256 336C211.817 336 176 300.183 176 256C176 211.817 211.817 176 256 176C279.091 176 299.636 186.909 312.727 203.636"
+        stroke="white"
+        stroke-width="48"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Camera Lens Accent -->
+  <circle cx="340" cy="340" r="32" fill="white" opacity="0.9"/>
+  <circle cx="340" cy="340" r="16" fill="#5865f2"/>
+
+  <!-- Gradient Definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5865f2"/>
+      <stop offset="100%" stop-color="#7983f5"/>
+    </linearGradient>
+  </defs>
+</svg>

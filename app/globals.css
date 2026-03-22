@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #5865f2;
+    --success: #43b581;
+    --warning: #faa61a;
+    --danger: #ed4245;
+    --bg-dark: #202225;
+    --bg-medium: #2f3136;
+    --bg-light: #36393f;
+    --text-primary: #ffffff;
+    --text-secondary: #dcddde;
+    --text-tertiary: #8e9297;
+  }
+
+  body {
+    @apply bg-bg-dark text-text-primary;
+    scroll-behavior: smooth;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
