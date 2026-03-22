@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx create-next-app:*)",
-      "Bash(sips:*)"
+      "Bash(sips:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/png-to-icns.sh:*)"
     ]
   }
 }
