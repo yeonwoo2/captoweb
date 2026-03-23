@@ -1,200 +1,204 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { signUp } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
-  const plan = searchParams?.get('plan') || 'free';
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    // Validation
-    if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('비밀번호는 최소 6자 이상이어야 합니다.');
-      return;
-    }
-
-    if (!agreedToTerms) {
-      setError('이용약관에 동의해주세요.');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await signUp(email, password);
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || '회원가입에 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
+  const handleSelectPlan = (planId: string) => {
+    // 세션 스토리지에 플랜 정보 저장
+    sessionStorage.setItem('selectedPlan', planId);
+    // 회원가입 페이지로 이동
+    router.push('/signup/register');
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-dark px-4">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="text-6xl mb-4">✅</div>
-          <h2 className="text-3xl font-bold text-white mb-4">
-            회원가입 완료!
-          </h2>
-          <p className="text-text-secondary">
-            이메일 인증 메일을 발송했습니다.
-            <br />
-            잠시 후 대시보드로 이동합니다...
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
+  const plans = [
+    {
+      id: 'free',
+      name: 'Free',
+      price: '무료',
+      priceKRW: null,
+      badge: null,
+      description: '개인 사용자를 위한 무료 플랜',
+      features: [
+        '월 100회 캡처',
+        '기본 캡처 기능',
+        '고품질 PNG 저장',
+        '갤러리 관리',
+      ],
+      notIncluded: [
+        '자동 캡처',
+        '우선 지원',
+        'API 접근',
+      ],
+    },
+    {
+      id: 'basic',
+      name: 'Basic',
+      price: '₩9,900',
+      priceKRW: 9900,
+      badge: '⭐ 인기',
+      description: '전문가를 위한 베스트 초이스',
+      features: [
+        '월 500회 캡처',
+        '모든 캡처 기능',
+        '자동 캡처 지원',
+        '고품질 PNG 저장',
+        '갤러리 관리',
+      ],
+      notIncluded: [
+        '우선 지원',
+        'API 접근',
+      ],
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: '₩29,900',
+      priceKRW: 29900,
+      badge: '🚀 최고',
+      description: '팀과 기업을 위한 프리미엄 플랜',
+      features: [
+        '무제한 캡처',
+        '모든 캡처 기능',
+        '자동 캡처 지원',
+        '우선 지원',
+        'API 접근',
+        '고급 분석',
+      ],
+      notIncluded: [],
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-dark px-4 py-12">
-      <motion.div
-        className="max-w-md w-full"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
+    <div className="min-h-screen bg-bg-dark py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Link href="/" className="inline-block mb-8">
             <span className="text-4xl font-bold text-primary">Capto</span>
           </Link>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            시작할 플랜을 선택하세요
+          </h1>
+          <p className="text-xl text-text-secondary">
+            언제든지 플랜을 변경할 수 있습니다
+          </p>
+        </motion.div>
+
+        {/* Plans Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          {plans.map((plan, index) => (
+            <motion.div
+              key={plan.id}
+              className={`bg-bg-medium rounded-2xl p-8 relative ${
+                plan.id === 'basic' ? 'ring-2 ring-primary transform md:-translate-y-4' : ''
+              }`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+            >
+              {/* Badge */}
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  {plan.badge}
+                </div>
+              )}
+
+              {/* Plan Name */}
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {plan.name}
+              </h3>
+              <p className="text-text-tertiary text-sm mb-4">
+                {plan.description}
+              </p>
+
+              {/* Price */}
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-white mb-1">
+                  {plan.price}
+                </div>
+                {plan.priceKRW && (
+                  <div className="text-text-secondary">
+                    /월 (VAT 포함)
+                  </div>
+                )}
+              </div>
+
+              {/* CTA Button */}
+              <button
+                onClick={() => handleSelectPlan(plan.id)}
+                className={`w-full py-3 rounded-lg font-semibold mb-8 transition-colors ${
+                  plan.id === 'basic'
+                    ? 'bg-primary text-white hover:bg-[#4752c4]'
+                    : 'bg-bg-light text-white hover:bg-bg-dark'
+                }`}
+              >
+                {plan.id === 'free' ? '무료로 시작하기' : '시작하기'}
+              </button>
+
+              {/* Features */}
+              <div className="space-y-3">
+                {plan.features.map((feature) => (
+                  <div key={feature} className="flex items-start">
+                    <svg
+                      className="w-5 h-5 text-success mr-3 mt-0.5 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-text-secondary">{feature}</span>
+                  </div>
+                ))}
+                {plan.notIncluded.map((feature) => (
+                  <div key={feature} className="flex items-start opacity-50">
+                    <svg
+                      className="w-5 h-5 text-text-tertiary mr-3 mt-0.5 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                    <span className="text-text-tertiary">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
         </div>
 
-        {/* Card */}
-        <div className="bg-bg-medium rounded-2xl p-8 shadow-xl">
-          <h1 className="text-3xl font-bold text-white mb-2 text-center">
-            Capto 계정 만들기
-          </h1>
-          <p className="text-text-secondary text-center mb-8">
-            {plan === 'basic' && '✨ Basic 플랜으로 시작합니다'}
-            {plan === 'pro' && '🚀 Pro 플랜으로 시작합니다'}
-            {plan === 'free' && '무료로 시작하세요'}
+        {/* Additional Info */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <p className="text-text-secondary mb-4">
+            💰 모든 플랜 7일 무료 체험 가능
           </p>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-danger/10 border border-danger text-danger px-4 py-3 rounded-lg mb-6">
-              {error}
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-text-secondary mb-2">
-                이메일
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-bg-dark text-white rounded-lg border border-bg-light focus:border-primary focus:outline-none transition-colors"
-                placeholder="your@email.com"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-text-secondary mb-2">
-                비밀번호
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-bg-dark text-white rounded-lg border border-bg-light focus:border-primary focus:outline-none transition-colors"
-                placeholder="••••••••"
-              />
-              <p className="text-text-tertiary text-sm mt-1">
-                최소 6자 이상
-              </p>
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-text-secondary mb-2">
-                비밀번호 확인
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 bg-bg-dark text-white rounded-lg border border-bg-light focus:border-primary focus:outline-none transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {/* Terms Agreement */}
-            <label className="flex items-start">
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-1 mr-2"
-              />
-              <span className="text-text-secondary text-sm">
-                <Link href="/terms" className="text-primary hover:underline">
-                  이용약관
-                </Link>
-                {' '}및{' '}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  개인정보처리방침
-                </Link>
-                에 동의합니다
-              </span>
-            </label>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:bg-[#4752c4] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? '회원가입 중...' : '회원가입'}
-            </button>
-          </form>
-
-          {/* Login Link */}
-          <p className="text-center text-text-secondary mt-8">
+          <p className="text-text-secondary">
             이미 계정이 있나요?{' '}
             <Link
               href="/login"
@@ -203,8 +207,8 @@ export default function SignupPage() {
               로그인
             </Link>
           </p>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

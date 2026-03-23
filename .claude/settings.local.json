@@ -4,7 +4,8 @@
       "Bash(npx create-next-app:*)",
       "Bash(sips:*)",
       "Bash(chmod:*)",
-      "Bash(./scripts/png-to-icns.sh:*)"
+      "Bash(./scripts/png-to-icns.sh:*)",
+      "Bash(firebase deploy:*)"
     ]
   }
 }

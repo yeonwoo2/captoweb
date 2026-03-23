@@ -4,10 +4,14 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, loading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { subscription, usage, loading: subscriptionLoading } = useSubscription();
+
+  const loading = authLoading || subscriptionLoading;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -83,20 +87,40 @@ export default function DashboardPage() {
             <h3 className="text-xl font-bold text-white mb-4">현재 플랜</h3>
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl font-bold text-primary">Free</span>
-                <span className="px-3 py-1 bg-success/20 text-success rounded-full text-sm font-semibold">
-                  활성화 ✓
+                <span className="text-2xl font-bold text-primary capitalize">
+                  {subscription?.plan || 'Free'}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  subscription?.status === 'active'
+                    ? 'bg-success/20 text-success'
+                    : 'bg-danger/20 text-danger'
+                }`}>
+                  {subscription?.status === 'active' ? '활성화 ✓' : '비활성'}
                 </span>
               </div>
-              <p className="text-text-secondary">무료 플랜</p>
+              <p className="text-text-secondary">
+                {subscription?.plan === 'free' && '무료 플랜'}
+                {subscription?.plan === 'basic' && 'Basic 플랜 - ₩9,900/월'}
+                {subscription?.plan === 'pro' && 'Pro 플랜 - ₩29,900/월'}
+              </p>
+              {subscription?.endDate && (
+                <p className="text-text-tertiary text-sm mt-2">
+                  갱신 예정일: {subscription.endDate.toLocaleDateString('ko-KR')}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <button className="w-full py-2 bg-primary text-white rounded-lg hover:bg-[#4752c4] transition-colors font-semibold">
+              <button
+                onClick={() => router.push('/#pricing')}
+                className="w-full py-2 bg-primary text-white rounded-lg hover:bg-[#4752c4] transition-colors font-semibold"
+              >
                 플랜 업그레이드
               </button>
-              <button className="w-full py-2 bg-bg-dark text-text-secondary rounded-lg hover:bg-bg-light transition-colors">
-                구독 취소
-              </button>
+              {subscription?.plan !== 'free' && (
+                <button className="w-full py-2 bg-bg-dark text-text-secondary rounded-lg hover:bg-bg-light transition-colors">
+                  구독 취소
+                </button>
+              )}
             </div>
           </motion.div>
 
@@ -111,15 +135,32 @@ export default function DashboardPage() {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-text-secondary">캡처 횟수</span>
-                <span className="text-white font-semibold">0 / 100 회</span>
+                <span className="text-white font-semibold">
+                  {usage?.captureCount || 0} / {subscription?.features.maxCapturesPerMonth === -1 ? '무제한' : subscription?.features.maxCapturesPerMonth || 100} 회
+                </span>
               </div>
               <div className="w-full bg-bg-dark rounded-full h-3">
-                <div className="bg-primary h-3 rounded-full" style={{ width: '0%' }} />
+                <div
+                  className="bg-primary h-3 rounded-full transition-all"
+                  style={{
+                    width: subscription?.features.maxCapturesPerMonth === -1
+                      ? '100%'
+                      : `${Math.min(((usage?.captureCount || 0) / (subscription?.features.maxCapturesPerMonth || 100)) * 100, 100)}%`
+                  }}
+                />
               </div>
             </div>
             <p className="text-text-tertiary text-sm">
-              남은 횟수: 100회
+              {subscription?.features.maxCapturesPerMonth === -1
+                ? '무제한 캡처 가능'
+                : `남은 횟수: ${(subscription?.features.maxCapturesPerMonth || 100) - (usage?.captureCount || 0)}회`
+              }
             </p>
+            {usage?.lastCaptureAt && (
+              <p className="text-text-tertiary text-sm mt-2">
+                마지막 캡처: {usage.lastCaptureAt.toLocaleString('ko-KR')}
+              </p>
+            )}
           </motion.div>
 
           {/* Quick Start Card */}
@@ -140,7 +181,7 @@ export default function DashboardPage() {
                   1. Capto 다운로드
                 </h4>
                 <p className="text-text-tertiary text-sm">
-                  macOS용 앱 설치하기
+                  macOS/Windows용 앱 설치하기
                 </p>
               </button>
 

@@ -24,7 +24,21 @@ export default function LoginPage() {
       await signIn(email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || '로그인에 실패했습니다.');
+      // Firebase 에러 코드를 사용자 친화적인 메시지로 변환
+      const errorCode = err.code;
+      let errorMessage = '로그인에 실패했습니다.';
+
+      if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
+        errorMessage = '이 정보와 일치하는 계정을 찾을 수 없어요.';
+      } else if (errorCode === 'auth/invalid-email') {
+        errorMessage = '유효하지 않은 이메일 주소입니다.';
+      } else if (errorCode === 'auth/user-disabled') {
+        errorMessage = '비활성화된 계정입니다. 고객 지원팀에 문의하세요.';
+      } else if (errorCode === 'auth/too-many-requests') {
+        errorMessage = '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

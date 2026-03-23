@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 const plans = [
   {
+    id: 'free',
     name: 'Free',
     price: '무료',
     badge: null,
@@ -18,10 +19,10 @@ const plans = [
       { text: 'API 접근', included: false },
     ],
     cta: '시작하기',
-    href: '/signup',
     highlighted: false,
   },
   {
+    id: 'basic',
     name: 'Basic',
     price: '₩9,900',
     priceUnit: '/월',
@@ -35,10 +36,10 @@ const plans = [
       { text: 'API 접근', included: false },
     ],
     cta: '지금 구독',
-    href: '/signup?plan=basic',
     highlighted: true,
   },
   {
+    id: 'pro',
     name: 'Pro',
     price: '₩29,900',
     priceUnit: '/월',
@@ -53,12 +54,12 @@ const plans = [
       { text: '우선 지원', included: true },
     ],
     cta: '지금 구독',
-    href: '/signup?plan=pro',
     highlighted: false,
   },
 ];
 
 export default function PricingSection() {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -82,6 +83,13 @@ export default function PricingSection() {
       }
     };
   }, []);
+
+  const handleSelectPlan = (planId: string) => {
+    // 세션 스토리지에 플랜 정보 저장
+    sessionStorage.setItem('selectedPlan', planId);
+    // 회원가입 페이지로 바로 이동
+    router.push('/signup/register');
+  };
 
   return (
     <section
@@ -165,8 +173,8 @@ export default function PricingSection() {
               </ul>
 
               {/* CTA Button */}
-              <Link
-                href={plan.href}
+              <button
+                onClick={() => handleSelectPlan(plan.id)}
                 className={`block w-full py-3 px-6 rounded-lg font-semibold text-center transition-all ${
                   plan.highlighted
                     ? 'bg-white text-primary hover:bg-gray-100'
@@ -174,7 +182,7 @@ export default function PricingSection() {
                 }`}
               >
                 {plan.cta}
-              </Link>
+              </button>
             </motion.div>
           ))}
         </div>
