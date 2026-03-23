@@ -62,7 +62,8 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await signUp(email, password);
+      // 선택한 플랜과 함께 회원가입
+      await signUp(email, password, plan);
 
       setSuccess(true);
       setTimeout(() => {

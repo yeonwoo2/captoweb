@@ -5,7 +5,9 @@
       "Bash(sips:*)",
       "Bash(chmod:*)",
       "Bash(./scripts/png-to-icns.sh:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)"
     ]
   }
 }

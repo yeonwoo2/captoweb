@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -38,27 +38,58 @@ export function useSubscription() {
       return;
     }
 
-    // Firestore에서 구독 정보 실시간 구독
-    const subscriptionRef = doc(db, 'subscriptions', user.uid);
-    const unsubscribeSubscription = onSnapshot(
-      subscriptionRef,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data();
-          setSubscription({
-            plan: data.plan || 'free',
-            status: data.status || 'active',
-            startDate: data.startDate?.toDate() || new Date(),
-            endDate: data.endDate?.toDate() || null,
-            captureLimit: data.captureLimit || 100,
-            features: data.features || {
-              canCapture: true,
-              canUseAutoCapture: false,
-              maxCapturesPerMonth: 100,
-            },
-          });
+    // 1. users 컬렉션에서 사용자 구독 정보 실시간 구독
+    const userRef = doc(db, 'users', user.uid);
+    const unsubscribeUser = onSnapshot(
+      userRef,
+      async (userDoc) => {
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const subscriptionPlan = userData.subscription_plan || 'free';
+
+          console.log('🔍 [useSubscription] userData:', userData);
+          console.log('🔍 [useSubscription] subscriptionPlan:', subscriptionPlan);
+
+          // 2. subscriptions 컬렉션에서 플랜 정의 조회 (JOIN)
+          const planRef = doc(db, 'subscriptions', subscriptionPlan);
+          const planDoc = await getDoc(planRef);
+
+          console.log('🔍 [useSubscription] planDoc exists:', planDoc.exists());
+
+          if (planDoc.exists()) {
+            const planData = planDoc.data();
+            console.log('🔍 [useSubscription] planData:', planData);
+
+            // 3. 두 데이터 병합
+            setSubscription({
+              plan: subscriptionPlan,
+              status: userData.status || 'active',
+              startDate: userData.start_date?.toDate() || new Date(),
+              endDate: userData.end_date?.toDate() || null,
+              captureLimit: planData.features?.max_captures_per_month || 100,
+              features: {
+                canCapture: planData.features?.can_capture ?? true,
+                canUseAutoCapture: planData.features?.can_use_auto_capture ?? false,
+                maxCapturesPerMonth: planData.features?.max_captures_per_month || 100,
+              },
+            });
+          } else {
+            // subscriptions 문서가 없으면 기본 Free 플랜 설정
+            setSubscription({
+              plan: 'free',
+              status: 'active',
+              startDate: new Date(),
+              endDate: null,
+              captureLimit: 100,
+              features: {
+                canCapture: true,
+                canUseAutoCapture: false,
+                maxCapturesPerMonth: 100,
+              },
+            });
+          }
         } else {
-          // 구독 정보가 없으면 기본 Free 플랜으로 설정 (로컬만)
+          // users 문서가 없으면 기본 Free 플랜 설정 (회원가입 실패 케이스)
           setSubscription({
             plan: 'free',
             status: 'active',
@@ -74,7 +105,7 @@ export function useSubscription() {
         }
       },
       (error) => {
-        console.error('Error fetching subscription:', error);
+        console.error('Error fetching user subscription:', error);
         // 에러 발생 시에도 기본 Free 플랜으로 설정
         setSubscription({
           plan: 'free',
@@ -92,7 +123,7 @@ export function useSubscription() {
       }
     );
 
-    // 현재 월의 사용량 가져오기
+    // 4. 현재 월의 사용량 가져오기
     const currentMonth = new Date().toISOString().slice(0, 7); // "2026-03"
     const usageRef = doc(db, 'usage', user.uid, 'monthly', currentMonth);
 
@@ -102,12 +133,12 @@ export function useSubscription() {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
           setUsage({
-            captureCount: data.captureCount || 0,
-            lastCaptureAt: data.lastCaptureAt?.toDate() || null,
+            captureCount: data.capture_count || 0,
+            lastCaptureAt: data.last_capture_at?.toDate() || null,
             month: currentMonth,
           });
         } else {
-          // 사용량 정보가 없으면 기본값으로 설정 (로컬만)
+          // 사용량 정보가 없으면 기본값으로 설정 (첫 캡처 전)
           setUsage({
             captureCount: 0,
             lastCaptureAt: null,
@@ -129,7 +160,7 @@ export function useSubscription() {
     );
 
     return () => {
-      unsubscribeSubscription();
+      unsubscribeUser();
       unsubscribeUsage();
     };
   }, [user]);

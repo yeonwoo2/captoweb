@@ -10,13 +10,14 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, plan?: 'free' | 'basic' | 'pro') => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -40,10 +41,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, plan: 'free' | 'basic' | 'pro' = 'free') => {
+    // 1. Firebase Auth에 사용자 생성
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
 
-    // 이메일 인증 발송
+    // 2. Firestore users 컬렉션에 구독 정보 저장
+    const now = new Date();
+    const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+    await setDoc(doc(db, 'users', user.uid), {
+      email: email,
+      subscription_plan: plan,  // 선택한 플랜
+      status: 'active',         // 기본값: 활성화
+      start_date: now,
+      end_date: oneYearLater,
+    });
+
+    // 3. 이메일 인증 발송
     await sendEmailVerification(user);
   };
 
