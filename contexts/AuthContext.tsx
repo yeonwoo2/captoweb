@@ -20,6 +20,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, plan?: 'free' | 'basic' | 'pro') => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -69,8 +70,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await sendPasswordResetEmail(auth, email);
   };
 
+  const resendVerificationEmail = async () => {
+    if (!user) {
+      throw new Error('로그인된 사용자가 없습니다.');
+    }
+    await sendEmailVerification(user);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword, resendVerificationEmail }}>
       {children}
     </AuthContext.Provider>
   );

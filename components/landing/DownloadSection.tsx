@@ -31,8 +31,22 @@ export default function DownloadSection() {
   }, []);
 
   const handleDownload = (platform: 'macos' | 'windows') => {
-    // TODO: Firebase Storage 또는 GitHub Releases에서 다운로드
-    // Google Analytics 이벤트 트래킹 추가
+    // 다운로드 URL 설정
+    const downloadUrls = {
+      macos: '/downloads/Capto-1.0.0.dmg',
+      windows: '/downloads/Capto-Setup-1.0.0.exe',
+    };
+
+    // 파일 다운로드
+    const url = downloadUrls[platform];
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = platform === 'macos' ? 'Capto-1.0.0.dmg' : 'Capto-Setup-1.0.0.exe';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Google Analytics 이벤트 트래킹 (향후 추가)
     console.log(`Download initiated for ${platform}`);
   };
 
@@ -96,13 +110,13 @@ export default function DownloadSection() {
                 macOS 다운로드
               </button>
               <button
-                onClick={() => handleDownload('windows')}
-                className="px-12 py-4 bg-white text-primary rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                disabled
+                className="px-12 py-4 bg-white/50 text-primary/50 rounded-lg font-semibold text-lg cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
               >
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3 12V6.75l6-1.32v6.48L3 12m6-7.25L21 3v9h-12V4.75M3 13l6 .09v6.81l-6-1.15V13m6 .09L21 13v9l-12-1.65V13.09Z" />
                 </svg>
-                Windows 다운로드
+                Windows (준비 중)
               </button>
             </div>
 

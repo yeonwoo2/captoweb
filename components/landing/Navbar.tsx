@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,18 +79,49 @@ export default function Navbar() {
             >
               다운로드
             </button>
-            <Link
-              href="/login"
-              className="px-4 py-2 text-text-secondary hover:text-primary transition-colors"
-            >
-              로그인
-            </Link>
-            <Link
-              href="/signup"
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#4752c4] transition-colors font-semibold"
-            >
-              시작하기
-            </Link>
+
+            {/* 로그인 상태에 따라 다른 버튼 표시 */}
+            {loading ? (
+              // 로딩 중일 때는 기존 버튼 표시
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-text-secondary hover:text-primary transition-colors"
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#4752c4] transition-colors font-semibold"
+                >
+                  시작하기
+                </Link>
+              </>
+            ) : user ? (
+              // 로그인된 사용자는 대시보드 버튼 표시
+              <Link
+                href="/dashboard"
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#4752c4] transition-colors font-semibold"
+              >
+                대시보드
+              </Link>
+            ) : (
+              // 로그인하지 않은 사용자는 로그인/회원가입 버튼 표시
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-text-secondary hover:text-primary transition-colors"
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-[#4752c4] transition-colors font-semibold"
+                >
+                  시작하기
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

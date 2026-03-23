@@ -15,7 +15,6 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [plan, setPlan] = useState<'free' | 'basic' | 'pro'>('free');
 
   // 세션 스토리지에서 플랜 정보 가져오기
@@ -65,16 +64,11 @@ export default function RegisterPage() {
       // 선택한 플랜과 함께 회원가입
       await signUp(email, password, plan);
 
-      setSuccess(true);
-      setTimeout(() => {
-        // Free 플랜은 바로 대시보드로, 유료 플랜은 결제 페이지로
-        if (plan === 'free') {
-          sessionStorage.removeItem('selectedPlan');
-          router.push('/dashboard');
-        } else {
-          router.push('/signup/payment');
-        }
-      }, 2000);
+      // 이메일 주소를 세션 스토리지에 저장 (인증 페이지에서 사용)
+      sessionStorage.setItem('verifyEmail', email);
+
+      // 이메일 인증 페이지로 리다이렉트 (플랜 정보는 이미 selectedPlan에 저장됨)
+      router.push('/signup/verify-email');
     } catch (err: any) {
       // Firebase 에러 코드를 사용자 친화적인 메시지로 변환
       const errorCode = err.code;
@@ -95,31 +89,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-dark px-4">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="text-6xl mb-4">✅</div>
-          <h2 className="text-3xl font-bold text-white mb-4">
-            회원가입 완료!
-          </h2>
-          <p className="text-text-secondary mb-2">
-            {currentPlan.emoji} {currentPlan.name} 플랜으로 시작합니다
-          </p>
-          <p className="text-text-secondary">
-            이메일 인증 메일을 발송했습니다.
-            <br />
-            잠시 후 대시보드로 이동합니다...
-          </p>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bg-dark px-4 py-12">
